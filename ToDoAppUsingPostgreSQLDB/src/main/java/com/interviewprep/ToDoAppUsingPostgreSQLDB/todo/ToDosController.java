@@ -4,8 +4,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -41,8 +45,9 @@ public class ToDosController {
 		    	return todo;
 		    }
 		}
+//		return null;
 		
-		throw new NoSuchElementException("User doesn't have a todo of matching id or that user doesn't exist");
+		throw new NoSuchElementException("User doesn't have a todo of matching id or that user doesn't exist"); //something i'm using to send back error status code
 		
 //		//could have used the findById method that we have but.... if did that then we wouldn't be checking for username
 //		//i.e. only http://localhost:8080/users/M/todos/1 should give me a todo for user M of ID 1 but... 
@@ -50,5 +55,27 @@ public class ToDosController {
 //		return thingThatInteractsWithDB.findById(id).get();
 	}
 	
+	@DeleteMapping("/users/{username}/todos/{id}")
+	public ResponseEntity<Void> deleteATodoOfAUser(@PathVariable String username, @PathVariable int id) {
+
+		
+		List<Todos> allTodosOfThisUser = thingThatInteractsWithDB.findByUsername(username);
+		
+		for (Todos todo : allTodosOfThisUser) 
+		{ 
+		    if (todo.getId() == id) {//there's a user with todo of matching id
+		    	thingThatInteractsWithDB.deleteById(id);
+		    	return ResponseEntity.noContent().build(); //some 200s status code
+		    }
+		}
+		
+		throw new EmptyResultDataAccessException(id); //something i'm using to send back error status code
+		
+//		//for same reasons as above endpoint didn't use built in JPA method
+//		thingThatInteractsWithDB.deleteById(id);
+//		return ResponseEntity.noContent().build(); //some 200s status code
+		
+	}
+
 
 }
