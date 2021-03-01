@@ -1,5 +1,6 @@
 package com.interviewprep.ToDoAppUsingPostgreSQLDB.todo;
 
+import java.net.URI;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import com.example.ch5HelloWorld.todo.Todo;
 
 @RestController
 public class ToDosController {
@@ -90,9 +94,18 @@ public class ToDosController {
 		
 	}
 	
-//	@PostMapping("/users/{username}/todos")
-//	public Todos createNewTodoForAUser(@PathVariable String username) {
-//		return thingThatInteractsWithDB.save(entity);
-//	}
+	@PostMapping("/users/{username}/todos")
+	public ResponseEntity<Void> createNewTodoForAUser(@PathVariable String username, @RequestBody Todos todo) {
+		
+		todo.setUsername(username);
+		Todos newlyCreatedTodoHopefullySomeoneDidntSendInTodoWithSameId = thingThatInteractsWithDB.save(todo);
+		
+		//Location of the new Todo we just created -> because that's what we normally send back in response to post request
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+				.path("/{id}")
+				.buildAndExpand(newlyCreatedTodoHopefullySomeoneDidntSendInTodoWithSameId.getId())
+				.toUri();
+		return ResponseEntity.created(uri).build();
+	}
 
 }
