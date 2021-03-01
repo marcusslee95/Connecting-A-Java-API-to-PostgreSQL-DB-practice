@@ -5,11 +5,14 @@ import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -76,6 +79,20 @@ public class ToDosController {
 //		return ResponseEntity.noContent().build(); //some 200s status code
 		
 	}
+	
+	@PutMapping("/users/{username}/todos/{id}")
+	public  ResponseEntity<Todos> updateATodoOfAUser(@PathVariable String username, @PathVariable int id, @RequestBody Todos todo) {
 
+		todo.setUsername(username); //honestly trivial.... just something for people that aren't using UI and just sending requests directly to this web service. in which case we'd want to set username property as whatever they sent in url... as opposed to username value in Todo.... 
+		
+		Todos updatedOrIfIdDoesntMatchNewlyCreatedTodo = thingThatInteractsWithDB.save(todo);
+		return new ResponseEntity<Todos>(updatedOrIfIdDoesntMatchNewlyCreatedTodo, HttpStatus.OK);
+		
+	}
+	
+//	@PostMapping("/users/{username}/todos")
+//	public Todos createNewTodoForAUser(@PathVariable String username) {
+//		return thingThatInteractsWithDB.save(entity);
+//	}
 
 }
